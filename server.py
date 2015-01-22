@@ -35,6 +35,10 @@ def uijs():
   f = app.send_static_file('ui.js')
   return f
 
+@app.route('/reset.css')
+def resetcss():
+  return app.send_static_file('reset.css')
+
 @app.route("/")
 def index():
   """Creates an empty user and redirects to 
@@ -57,6 +61,7 @@ def todos(user_id):
     return jsonify({"todos" : []})
 
   output = app.todo_orm.all_by_user(user_id)
+  output.reverse()
   return jsonify({"todos" : output})
 
 @app.route("/<user_id>/todo/create", methods=['POST'])

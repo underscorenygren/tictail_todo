@@ -64,32 +64,37 @@
   function todo_to_jq(_todo) {
     var todo = todo_model(_todo),
         id = todo.id(),
-        $todo = $("<div id='todo-" + id + 
-                  "' class='todo'></div>"),
-
+        $controls = $("<td class='controls'></td>"),
+        $todo = $("<tr id='todo-" + id + 
+                  "' class='todo'></tr>"),
         $inc = $("<a href='#' class='todoctrl inc-prio'>more</a>"),
         $dec = $("<a href='#' class='todoctrl dec-prio'>less</a>"),
         $del = $("<a href='#' class='todoctrl delete'>delete</a>"),
         $done = $("<a href='#' class='todoctrl done-btn'>" + 
-          (todo.done() ? "not done" : "done") + "</a>");
+          (todo.done() ? "not&nbsp;done" : "done") + "</a>"),
+        $text = $("<div></div>");
+
 
     if (todo.done()) {
-      $todo.addClass('done');
+      $text.addClass('done');
     }
     if (todo.prio()) {
-      $todo.addClass('prio-' + todo.prio());
+      $text.addClass('prio-' + todo.prio());
     }
-    $todo.text(todo.text());
+
+    $text.text(todo.text());
 
     ajax_wrapper($inc, 'incprio', id);
     ajax_wrapper($dec, 'decprio', id);
     ajax_wrapper($del, 'delete', id);
     ajax_wrapper($done, 'done', id);
 
-    $todo.append($del);
-    $todo.append($inc);
-    $todo.append($dec);
-    $todo.append($done);
+    $todo.append($('<td class="text"></td>').append($text));
+    $controls.append($done);
+    $controls.append($inc);
+    $controls.append($dec);
+    $controls.append($del);
+    $todo.append($controls);
 
     return $todo;
   }
@@ -97,7 +102,7 @@
   function update_ui() {
 
     var $todo_root = $('#todo_root')
-        $inserter = $('<div id=\'todo_root\'></div>');
+        $inserter = $('<table id=\'todo_root\'></table>');
 
     for (var i = 0, il = todos.length; i < il; i++) {
 

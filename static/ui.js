@@ -66,10 +66,12 @@
         id = todo.id(),
         $todo = $("<div id='todo-" + id + 
                   "' class='todo'></div>"),
-        $inc = $("<a href='#' class='todoctrl inc-prio'>+ Prio</a>"),
-        $dec = $("<a href='#' class='todoctrl dec-prio'>- Prio</a>"),
-        $del = $("<a href='#' class='todoctrl delete'>Delete</a>"),
-        $done = $("<a href='#' class='todoctrl done-btn'>(un)Done</a>");
+
+        $inc = $("<a href='#' class='todoctrl inc-prio'>more</a>"),
+        $dec = $("<a href='#' class='todoctrl dec-prio'>less</a>"),
+        $del = $("<a href='#' class='todoctrl delete'>delete</a>"),
+        $done = $("<a href='#' class='todoctrl done-btn'>" + 
+          (todo.done() ? "not done" : "done") + "</a>");
 
     if (todo.done()) {
       $todo.addClass('done');
@@ -84,10 +86,10 @@
     ajax_wrapper($del, 'delete', id);
     ajax_wrapper($done, 'done', id);
 
-    $todo.append($done);
+    $todo.append($del);
     $todo.append($inc);
     $todo.append($dec);
-    $todo.append($del);
+    $todo.append($done);
 
     return $todo;
   }

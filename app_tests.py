@@ -11,9 +11,8 @@ USR_ID = 'testusr'
 def _url(name):
   return "%s/%s" % (USR_ID, name)
 
-def _del(todo):
-  todo_id = todo['id']
-  path = "todo/%s/delete" % todo_id
+def _todo_url(todo_id, endpoint):
+  path = "todo/%s/%s" % (todo_id, endpoint)
   return _url(path)
 
 
@@ -30,9 +29,9 @@ class AppTestCase(unittest.TestCase):
     usr = app.todo_orm.create_user()
     usr.update(USR_NAME, USR_ID)
 
-  def _json(self, route, use_post = False, assert_200 = True):
-    if use_post:
-      resp = self.app.post(route)
+  def _json(self, route, post_data = None, assert_200 = True):
+    if post_data != None:
+      resp = self.app.post(route, data=post_data)
     else:
       resp = self.app.get(route)
 
@@ -77,7 +76,8 @@ class AppTestCase(unittest.TestCase):
     assert _todos != None
     assert len(_todos) == 0
 
-    todo = self._json(_url("todo/create"), True)
+    todo = self._json(_url("todo/create"), 
+                  {"text" : u"test"})
     assert todo['text'] == u"test"
     assert todo['done'] == False
 
@@ -86,13 +86,64 @@ class AppTestCase(unittest.TestCase):
     assert _todos != None
     assert len(_todos) == 1
 
-    todo = self._json(_del(todo), True)
+    todo = self._json(_todo_url(todo['id'], 'delete'), {})
     assert todo['text'] == 'test'
 
     data = self._json(_url('todos'))
     _todos = data.get('todos', None)
     assert _todos != None
     assert len(_todos) == 0
+
+  def test_updates(self):
+    todo = self._json(_url("todo/create"), 
+                  {"text" : u"new test"})
+    assert todo['text'] == u"new test"
+    assert todo['done'] == False
+    assert todo['priority'] == 1
+    todo_id = todo['id']
+
+    self._json(_todo_url(todo_id, 'done'), {})
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['done'] == True
+
+    self._json(_todo_url(todo_id, 'done'), {})
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['done'] == False
+
+    self._json(_todo_url(todo_id, 'text'), 
+      {'text' : u'newnew'})
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['text'] == 'newnew'
+
+    self._json(_todo_url(todo_id, 'incprio'), {})
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['priority'] == 2
+    
+    self._json(_todo_url(todo_id, 'decprio'), {})
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['priority'] == 1
+
+    #Cannot go lower than 1
+    self._json(_todo_url(todo_id, 'decprio'), {})
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['priority'] == 1
+
+    self._json(_todo_url(todo_id, 'incprio'), {})
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['priority'] == 2
+
+    self._json(_todo_url(todo_id, 'incprio'), {})
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['priority'] == 3
+
+    self._json(_todo_url(todo_id, 'incprio'), {})
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['priority'] == 4
+
+    self._json(_todo_url(todo_id, 'incprio'), {}) #4 again (max)
+    todo = self._json(_todo_url(todo_id, 'get'))
+    assert todo['priority'] == 4
+ 
 
 if __name__ == "__main__":
   

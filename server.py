@@ -3,7 +3,7 @@ import sys, os
 from mongokit import Connection
 
 from flask import render_template, jsonify, \
-  redirect, url_for
+  redirect, url_for, request
 from todo import TodoORM
 
 MONGO_HOST = 'localhost'
@@ -39,17 +39,79 @@ def index():
   return redirect(
     url_for('todos',  **{'user_id' : new_usr.usr_id()}))
 
+@app.route("/<user_id>/")
+def user_root():
+  if not app.todo_orm.ensure_user(user_id):
+    return render_404()
+
+  return render_html('todos')
+
 @app.route("/<user_id>/todos")
 def todos(user_id):
   if not app.todo_orm.ensure_user(user_id):
-    return render_404()
+    return jsonify({"todos" : []})
 
   output = app.todo_orm.all_by_user(user_id)
   return jsonify({"todos" : output})
 
 @app.route("/<user_id>/todo/create", methods=['POST'])
 def create(user_id):
-  todo = app.todo_orm.create_todo(user_id, u"test")
+  text = request.form['text']
+  todo = app.todo_orm.create_todo(user_id, text)
+
+  return jsonify(todo.to_json_dict())
+
+@app.route("/<user_id>/todo/<todo_id>/get")
+def get_todo(user_id, todo_id):
+  todo = app.todo_orm.find_model_by_id_and_user(todo_id, user_id)
+
+  if not todo:
+    return jsonify({"msg" : "No todo with that id"})
+
+  return jsonify(todo.to_json_dict())
+
+@app.route("/<user_id>/todo/<todo_id>/text", methods=['POST'])
+def update_text(user_id, todo_id):
+  todo = app.todo_orm.find_model_by_id_and_user(todo_id, user_id)
+  
+  if not todo:
+    return jsonify({"msg" : "No todo with that id"})
+
+  text = request.form['text']
+  todo.update(text)
+
+  return jsonify(todo.to_json_dict())
+
+@app.route("/<user_id>/todo/<todo_id>/done", methods=['POST'])
+def done(user_id, todo_id):
+  todo = app.todo_orm.find_model_by_id_and_user(todo_id, user_id)
+  
+  if not todo:
+    return jsonify({"msg" : "No todo with that id"})
+  
+  todo.toggle_done()
+
+  return jsonify(todo.to_json_dict())
+
+@app.route("/<user_id>/todo/<todo_id>/incprio", methods=['POST'])
+def incprio(user_id, todo_id):
+  todo = app.todo_orm.find_model_by_id_and_user(todo_id, user_id)
+  
+  if not todo:
+    return jsonify({"msg" : "No todo with that id"})
+  
+  todo.increase_priority()
+
+  return jsonify(todo.to_json_dict())
+
+@app.route("/<user_id>/todo/<todo_id>/decprio", methods=['POST'])
+def devprio(user_id, todo_id):
+  todo = app.todo_orm.find_model_by_id_and_user(todo_id, user_id)
+  
+  if not todo:
+    return jsonify({"msg" : "No todo with that id"})
+  
+  todo.decrease_priority()
 
   return jsonify(todo.to_json_dict())
 

@@ -39,6 +39,15 @@ class TodoORM():
       {"id" : todo_id, 
        "user" : user_id}))
 
+  def find_model_by_id_and_user(self, todo_id, user_id):
+    """Struggled with realizing how to query by model - 
+      realized it was conn.[Model]. Hence this method 
+      separate from the dict based ones. """
+    
+    return self.todos.MongoTodo.find_one(
+      {"id" : todo_id, 
+       "user" : user_id})
+
   def find_by_id(todo_id):
     return self._query_to_json_dict(self.todos.find_one(
       {"id" : todo_id}))
@@ -154,14 +163,23 @@ class MongoTodo(Document):
 
     do_update = text != None or done != None or priority != None
     if do_update:
-      if text:
+      if text != None:
         self['text'] = text
-      if done:
+      if done != None:
         self['done'] = done
-      if priority:
+      if priority != None:
         self['priority'] = priority
 
+      #There's some type confusion here, stopgap solution
+      self['id'] = str(self['id'])
+      self['user'] = str(self['user'])
+
       self.save()
+
+  def toggle_done(self):
+    
+    done = not self['done']
+    self.update(None, done, None)
 
   def increase_priority(self):
     if self['priority'] < Priority.urgent:

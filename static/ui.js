@@ -1,7 +1,6 @@
 (function() {
 
-  var todos = [], 
-      usr_id = 'test';
+  var todos = [];
 
   function todo_model(api_data) {
 
@@ -18,68 +17,76 @@
       prio : function() {
         return api_data['priority'];
       },
-      id : functino() {
+      id : function() {
         return api_data['id'];
       }
     }
   }
 
   function _url(endpoint) {
-    return "" + usr_id + "/" + endpoint;
+    return "" + endpoint;
   }
 
   function _todo_url(todo_id, endpoint) {
-    return _url("" + todo_id + "/" + endpoint);
+    return _url("todo/" + todo_id + "/" + endpoint);
   }
 
   function load_todos() {
     $.getJSON(_url('todos'), function(data) {
-      todos = data;
+      todos = data['todos'];
       update_ui();
     });
   }
 
   function ajax_wrapper($elem, endpoint, 
-                        todo_id callback) {
-    var url = _todo_url(todo_id, endpoint),
+                        todo_id, data_callback) {
+    var url;
+    
+    if (todo_id) {
+      url = _todo_url(todo_id, endpoint);
+    } else {
+      url = _url(endpoint);
+    }
 
     $elem.click(function() {
-      $.post(url, function(data) { 
-        console.log(data);
-        if (callback) {
-          callback(data);
-        }
-        update_ui();
+      var data = null;
+      if (data_callback) { 
+        data = data_callback();
+      }
+
+      $.post(url, data, function(_data) { 
+        console.log(_data);
+        load_todos();
       });
-    );
+    });
   }
 
   function todo_to_jq(_todo) {
     var todo = todo_model(_todo),
         id = todo.id(),
         $todo = $("<div id='todo-" + id + 
-                  "'></div>"),
-        $inc = $("<a href='#' class='inc-prio'>+ Prio</a>"),
-        $dec = $("<a href='#' class='dec-prio'>- Prio</a>"),
-        $del = $("<a href='#' class='delete'>Delete</a>"),
-        $done = $("<a href='#' class='done-btn'>(un)Done</a>");
+                  "' class='todo'></div>"),
+        $inc = $("<a href='#' class='todoctrl inc-prio'>+ Prio</a>"),
+        $dec = $("<a href='#' class='todoctrl dec-prio'>- Prio</a>"),
+        $del = $("<a href='#' class='todoctrl delete'>Delete</a>"),
+        $done = $("<a href='#' class='todoctrl done-btn'>(un)Done</a>");
 
     if (todo.done()) {
       $todo.addClass('done');
     }
     if (todo.prio()) {
-      $todo.addClass('prio-' + todo.prio);
+      $todo.addClass('prio-' + todo.prio());
     }
     $todo.text(todo.text());
 
-    ajax_wrapper($inc, todo_id, 'incprio');
-    ajax_wrapper($dev, todo_id, 'decprio');
-    ajax_wrapper($del, todo_id, 'delete');
-    ajax_wrapper($done, todo_id, 'done');
+    ajax_wrapper($inc, 'incprio', id);
+    ajax_wrapper($dec, 'decprio', id);
+    ajax_wrapper($del, 'delete', id);
+    ajax_wrapper($done, 'done', id);
 
     $todo.append($done);
     $todo.append($inc);
-    $todo.append($dev);
+    $todo.append($dec);
     $todo.append($del);
 
     return $todo;
@@ -100,12 +107,21 @@
 
     $todo_root.replaceWith($inserter);
 
-    }
+  }
 
+  function get_and_clear_input() {
+    var $inp = $("#new_input"), 
+        val = $inp.val();
+
+    $inp.val('');
+    return val;
   }
 
   $(document).ready(function() {
-
+    ajax_wrapper($('#newtodo'), 'todo/create', false, 
+      function() {
+        return {"text": get_and_clear_input()};
+      });
     load_todos();
   });
 

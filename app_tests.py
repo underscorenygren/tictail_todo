@@ -143,7 +143,6 @@ class AppTestCase(unittest.TestCase):
     self._json(_todo_url(todo_id, 'incprio'), {}) #4 again (max)
     todo = self._json(_todo_url(todo_id, 'get'))
     assert todo['priority'] == 4
- 
 
 if __name__ == "__main__":
   

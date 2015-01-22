@@ -1,13 +1,80 @@
 <html>
 <head>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-  <script src="./ui.js"></script>
+  <script src="/ui.js"></script>
+  <style>
+
+    body {
+      color: white;
+      background-color: black;
+      font-size: 20pt;
+      font-family: 'Helvetica', 'Arial', 'sans-serif'
+    }
+
+    #wrapper {
+      text-align: center;
+    }
+
+    #container {
+      width: 800px;
+      margin: 0 auto;
+    }
+
+    #todo_root {
+      text-align: left;
+    }
+
+    a {
+      color: green;
+      margin: auto 10px;
+    }
+
+    .todo {
+      width: 800px;
+      border-bottom: 1pt dotted white;
+      margin-top: 10px;
+    }
+
+    a.todoctrl {
+      font-size: 16pt;
+      float: right;
+    }
+
+    .prio-1 {
+      font-size: 20pt;
+    }
+
+    .prio-2 {
+      font-size: 28pt;
+    }
+
+    .prio-3 {
+      font-size: 36pt;
+      text-decoration: underline;
+    }
+
+    .prio-4 {
+      font-size: 40pt;
+      color: red;
+      font-weight: bold;
+    }
+
+    .done {
+      text-decoration: line-through;
+    }
+
+  </style>
 </head>
 
 <body>
   
-  <div id="todo_root"></div>
-
+  <div id="wrapper">
+    <div id="container">
+      <input id="new_input" type="text"></input>
+      <a href="#" id='newtodo'>New Todo</a>
+      <div id="todo_root"></div>
+    </div>
+  </div>
 
 </body>
 </html>

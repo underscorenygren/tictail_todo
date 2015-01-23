@@ -55,6 +55,13 @@ def user_root(user_id):
 
   return render_html('todos', {})
 
+@app.route("/<user_id>/classic")
+def user_root_classic(user_id):
+  if not app.todo_orm.ensure_user(user_id):
+    return render_404()
+
+  return render_html('sleekui', {})
+
 @app.route("/<user_id>/todos")
 def todos(user_id):
   if not app.todo_orm.ensure_user(user_id):

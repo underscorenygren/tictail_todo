@@ -58,6 +58,8 @@
         console.log(_data);
         load_todos();
       });
+
+      return false;
     });
   }
 
@@ -91,7 +93,32 @@
     $editor.focus();
   }
 
-  function todo_to_jq(_todo) {
+  function todo_to_jq_classic(_todo, i) {
+
+    var todo = todo_model(_todo),
+        id = todo.id(),
+        $todo = $("<div id='todo-" + id + 
+                  "' class='todo'></div>"),
+        $check = $('<input type="checkbox" class="form-control cbox">'),
+        $text = $("<div class='text-div'></div>"), 
+        even_odd = i % 2 == 0 ? 'even' : 'odd';
+
+    if (todo.done()) {
+      $text.addClass('done');
+      $check.attr('checked', 'checked');
+    }
+    $text.text(todo.text());
+    $todo.addClass(even_odd);
+
+    ajax_wrapper($todo, 'done', id);
+    $todo.append($check);
+    $todo.append($text);
+
+    return $todo;
+
+  }
+
+  function todo_to_jq_retro(_todo, i) {
     var todo = todo_model(_todo),
         id = todo.id(),
         $controls = $("<td class='controls'></td>"),
@@ -116,6 +143,7 @@
     $text.text(todo.text());
     $text_td.click(function() {
       replace_with_input(todo, $text)
+      return false;
     });
 
     ajax_wrapper($inc, 'incprio', id);
@@ -133,21 +161,37 @@
     return $todo;
   }
 
+  var todo_to_jq = (function() { 
+    var classic = window.CLASSIC_VIEW || false;
+    if (classic) {
+      return todo_to_jq_classic;
+    } else {
+      return todo_to_jq_retro;
+    }
+  })();
+
   function update_ui() {
 
-    var $todo_root = $('#todo_root')
-        $inserter = $('<table id=\'todo_root\'></table>');
+    var $todo_root = $('#todo_root'),
+        type = CLASSIC_VIEW ? 'div' : 'table',
+        $inserter = $('<' + type + ' id=\'todo_root\'></' + type + '>'),
+        n_done = 0, $n_left = $('#n_left'), 
+        i, il;
 
-    for (var i = 0, il = todos.length; i < il; i++) {
+    for (i = 0, il = todos.length; i < il; i++) {
 
       var todo = todos[i],
-          $todo = todo_to_jq(todo);
+          $todo = todo_to_jq(todo, i);
+
+      if (todo_model(todo).done()) {
+        n_done += 1;
+      }
 
       $inserter.append($todo);
     }
+    $n_left.text(il - n_done);
 
     $todo_root.replaceWith($inserter);
-
   }
 
   function get_and_clear_input() {
@@ -173,27 +217,49 @@
       }
     });
 
-    $('#delete_completed').click(function() {
+    function apply_on_all_todos(bool_check, endpoint) {
       //This should really be solved with promises
       //But counting up and down is prob good enough
-      var done = 0;
+      var pending = 0;
       for (var i = 0, il = todos.length; i < il; i++) {
         var _todo = todos[i],
             todo = todo_model(_todo);
 
-        if (todo.done()) {
-          var url = _todo_url(todo.id(), 'delete');
-          done += 1;
+        if (bool_check(todo)) {
+          var url = _todo_url(todo.id(), endpoint);
+          pending += 1;
           $.post(url, null, function(data) {
-            done -= 1;
+            pending -= 1;
 
-            if (done === 0) {
+            if (pending === 0) {
               load_todos();
             }
 
           });
         }
       }
+    }
+
+    $('#delete_completed').click(function() {
+      apply_on_all_todos(
+        function(todo) {
+          return todo.done();
+        }, 
+        'delete'
+      );
+
+      return false;
+    });
+
+    $('.all_complete').click(function() {
+      apply_on_all_todos(
+        function(todo) {
+          return !todo.done();
+        },
+        'done'
+      );
+      
+      return false;
     });
 
     load_todos();

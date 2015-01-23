@@ -31,10 +31,12 @@ Handles users using URLs only, an obfuscated url is automatically greated when u
 
 Persisent storage of todos on server using mongo. 
 
-Prioritization of todos using a simple priority system, which signals important using font-size. 
+Prioritization of todos using a simple priority system, which signals importance using font-size. 
 Completion and Deletion of todos.
 
 A Flask-integrated unittesting suite. 
+
+A nice, retro feel (I'm not going to go so far as to call it minimalist).
 
 Testing
 =====

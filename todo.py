@@ -17,7 +17,7 @@ class TodoORM():
     return usr
 
   def ensure_user(self, user_id):
-    usr = self.users.find({"identifier" : user_id})
+    usr = self.users.find_one({"identifier" : user_id})
 
     return True if usr else False
 

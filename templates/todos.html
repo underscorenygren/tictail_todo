@@ -1,6 +1,9 @@
 <html>
 <head>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script type="text/javascript">
+    window['CLASSIC_VIEW'] = false;
+  </script>
   <script src="/ui.js"></script>
   <link rel="text/stylesheet" src="/reset.css">
   <style>
@@ -85,6 +88,16 @@
       top: 5px;
     }
 
+    .classic-link {
+      font-size: 10pt;
+    }
+
+    #footer {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+
   </style>
 </head>
 
@@ -96,6 +109,9 @@
       <a href="#" id='newtodo' class='topctrl'>New Todo</a>
       <a href="#" id='delete_completed' class='topctrl'>Delete Completed</a>
       <table id="todo_root"></table>
+      <div id="footer">
+        <a class="classic-link" href="classic">[classic view]</a>
+      </div>
     </div>
   </div>
 

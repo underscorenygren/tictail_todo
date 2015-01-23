@@ -48,7 +48,7 @@ def index():
   return redirect(
     url_for('user_root_classic',  **{'user_id' : new_usr.usr_id()}))
 
-@app.route("/<user_id>/")
+@app.route("/<user_id>/retro")
 def user_root(user_id):
   if not app.todo_orm.ensure_user(user_id):
     return render_404()

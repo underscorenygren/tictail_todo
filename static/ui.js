@@ -61,6 +61,31 @@
     });
   }
 
+  function replace_with_input(todo, $text) {
+
+    var $editor = $('<input class="text_input"></input>'),
+        url = _todo_url(todo.id(), 'text');
+
+    $editor.val(todo.text());
+    $editor.keyup(function(evt) { 
+      if (evt.keyCode == 13) {//enter
+      
+        $.post(url, 
+          {"text" : 
+            $editor.val()}, 
+          function(_data) { 
+              console.log(_data);
+              load_todos();
+          });
+      } else if (evt.keyCode == 27) { //escape
+        //Resets ui without changes
+        load_todos();
+      }
+    });
+
+    $text.replaceWith($editor);
+  }
+
   function todo_to_jq(_todo) {
     var todo = todo_model(_todo),
         id = todo.id(),
@@ -72,7 +97,8 @@
         $del = $("<a href='#' class='todoctrl delete'>delete</a>"),
         $done = $("<a href='#' class='todoctrl done-btn'>" + 
           (todo.done() ? "not&nbsp;done" : "done") + "</a>"),
-        $text = $("<div></div>");
+        $text = $("<div></div>"),
+        $text_td = $('<td class="text"></td>');
 
 
     if (todo.done()) {
@@ -83,13 +109,16 @@
     }
 
     $text.text(todo.text());
+    $text_td.click(function() {
+      replace_with_input(todo, $text)
+    });
 
     ajax_wrapper($inc, 'incprio', id);
     ajax_wrapper($dec, 'decprio', id);
     ajax_wrapper($del, 'delete', id);
     ajax_wrapper($done, 'done', id);
 
-    $todo.append($('<td class="text"></td>').append($text));
+    $todo.append($text_td.append($text));
     $controls.append($done);
     $controls.append($inc);
     $controls.append($dec);
@@ -130,6 +159,7 @@
         return {"text": get_and_clear_input()};
       });
     load_todos();
+    $('#new_input').focus();
   });
 
 })();

@@ -51,22 +51,38 @@
     }
 
     .prio-2 {
-      font-size: 28pt;
+      font-size: 32pt;
     }
 
     .prio-3 {
-      font-size: 36pt;
+      font-size: 40pt;
       text-decoration: underline;
     }
 
     .prio-4 {
-      font-size: 40pt;
+      font-size: 42pt;
       color: red;
       font-weight: bold;
     }
 
     .done {
       text-decoration: line-through;
+    }
+
+    .text_input {
+      width: 700px;
+      height: 24pt;
+      color: white;
+      background-color: black;
+    }
+
+    #new_input {
+      width: 800px;
+    }
+
+    #newtodo {
+      position: relative;
+      top: 5px;
     }
 
   </style>
@@ -76,7 +92,7 @@
   
   <div id="wrapper">
     <div id="container">
-      <input id="new_input" type="text"></input>
+      <input id="new_input" class="text_input" type="text"></input>
       <a href="#" id='newtodo'>New Todo</a>
       <table id="todo_root"></table>
     </div>

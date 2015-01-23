@@ -1,6 +1,7 @@
 from mongokit import Document
 from enum import Enum
 import shortuuid
+import datetime
 
 class TodoORM():
   
@@ -31,7 +32,9 @@ class TodoORM():
     if not self.ensure_user(user_id):
       return None
     
-    _todos = self.todos.find({"user" : user_id})
+    _todos = self.todos
+      .find({"user" : user_id})
+      .sort({"created_at" : -1})
     return self._query_to_json_dict(_todos)
 
   def find_by_id_and_user(self, todo_id, user_id):
@@ -131,6 +134,7 @@ class MongoTodo(Document):
     "done" : bool,
     "user" : str,
     "priority" : int,
+    "created_at" : datetime.datetime
   }
 
   use_dot_notation = True
@@ -155,6 +159,7 @@ class MongoTodo(Document):
     self['priority'] = Priority.low
     uuid = shortuuid.ShortUUID().random(length=32)
     self['id'] = uuid
+    self['created_at'] = datetime.now()
 
     self.update(text)
 

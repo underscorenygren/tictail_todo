@@ -68,7 +68,7 @@
 
     $editor.val(todo.text());
     $editor.keyup(function(evt) { 
-      if (evt.keyCode == 13) {//enter
+      if (evt.keyCode === 13) {//enter
       
         $.post(url, 
           {"text" : 
@@ -77,13 +77,18 @@
               console.log(_data);
               load_todos();
           });
-      } else if (evt.keyCode == 27) { //escape
+      } else if (evt.keyCode === 27) { //escape
         //Resets ui without changes
         load_todos();
       }
     });
 
+    $editor.blur(function() {
+      load_todos();
+    });
+
     $text.replaceWith($editor);
+    $editor.focus();
   }
 
   function todo_to_jq(_todo) {
@@ -153,11 +158,36 @@
     return val;
   }
 
+
   $(document).ready(function() {
     ajax_wrapper($('#newtodo'), 'todo/create', false, 
       function() {
         return {"text": get_and_clear_input()};
       });
+
+    $('#delete_completed').click(function() {
+      //This should really be solved with promises
+      //But counting up and down is prob good enough
+      var done = 0;
+      for (var i = 0, il = todos.length; i < il; i++) {
+        var _todo = todos[i],
+            todo = todo_model(_todo);
+
+        if (todo.done()) {
+          var url = _todo_url(todo.id(), 'delete');
+          done += 1;
+          $.post(url, null, function(data) {
+            done -= 1;
+
+            if (done === 0) {
+              load_todos();
+            }
+
+          });
+        }
+      }
+    });
+
     load_todos();
     $('#new_input').focus();
   });

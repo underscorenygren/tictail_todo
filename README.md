@@ -5,13 +5,19 @@ This coding experiment showcases a simple todo application using Flask backed by
 Installation
 ======
 
-Install mongo
-Install python
+`Install mongo`
+
+`Install python`
+
 install dependencies:
-pip install flask
-pip install mongokit
-pip install shortuuid
-pip install enum
+
+`pip install flask`
+
+`pip install mongokit`
+
+`pip install shortuuid`
+
+`pip install enum`
 
 Running
 =====

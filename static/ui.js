@@ -160,10 +160,18 @@
 
 
   $(document).ready(function() {
-    ajax_wrapper($('#newtodo'), 'todo/create', false, 
+    var $newtodo = $('#newtodo');
+    ajax_wrapper($newtodo, 'todo/create', false, 
       function() {
         return {"text": get_and_clear_input()};
       });
+
+    $('#new_input').keyup(function(event) {
+      
+      if (event.keyCode == 13) {
+        $newtodo.click();
+      }
+    });
 
     $('#delete_completed').click(function() {
       //This should really be solved with promises

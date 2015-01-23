@@ -36,7 +36,7 @@ Completion and Deletion of todos.
 
 A Flask-integrated unittesting suite. 
 
-A nice, retro feel (I'm not going to go so far as to call it minimalist).
+Two different interfaces! A classic style based on a pre-supplied design using bootstrap, and a nice retro feel with darker colors and some experiments in font weights (see below). 
 
 Testing
 =====
@@ -60,4 +60,6 @@ When I originally designed the datamodel I went with a simple fixed integer prio
 
 I've always been interested in webapps that create anonymous users on the client's behalf, and then gives them a siloes space for edits that they can only access with the unique URL. Hence, I mirrored this approach. My implementation is a bit too simplistic - aside from XSS concerns, it doesn't do any deletion/maintenance of dummy users that have been created without being interacted with. This could be easily handled by a cron that checks for users without todos and deletes them, but once again I didn't feel any need to focus on that in this experiment. 
 
+After revisiting the instructions, I realized there was a visual component that I had previously overlooked. As such, I went back over my design and implemented the 'classic' skin. Fortunately, the RESTful design of the API lent itself well to reuse, and most of the Javascript was cross compatible. I only had to update one html-creating function (the translation of todo data objects to html) which wasn't too much trouble. The only server side component that required some work was the aforementioned positioning, which ended up being easily solved with an added endpoint and data field. For this second refactor, I kept most of my changes on the client side to avoid messing up dependencies with the old 'retro' view, and in the end I'm pleased with how well the two very different looking skins are working on almost identical code. For dragging and dropping I used jQueryUI as I had some previous experience with it and it's very easy to plug in. 
 
+I have not tested the look and feel of the app outside of Chrome on Linux. Based on my previous experience, I'm not confident it will render to spec across all browsers and OS'es (not to mention mobile screens). For the purposes of this experiment I'm content with this limited functionality, but using bootstrap and a bit of testing, it should be straightforward to extend the design to flow smoothly across devices. 

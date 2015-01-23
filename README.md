@@ -1,10 +1,6 @@
 # tictail_todo
-An mvc todo coding experiment
 
-Purpose
-====
-
-This coding experiment showcases a simple todo application using Flask backed by Mongo and a jQuery front end. It handles setting and completing todos for unauthenticated but obfuscated users.
+This coding experiment showcases a simple todo application using Flask backed by Mongo and a jQuery front end. It handles creating, updating and completing todos for unauthenticated but obfuscated users.
 
 Installation
 ======
@@ -17,7 +13,10 @@ pip install mongokit
 pip install shortuuid
 pip install enum
 
-? How the hell is flask unit testing supposed to handle 500?
+Running
+=====
+
+`python server.py`
 
 Features
 ===
@@ -28,6 +27,13 @@ Persisent storage of todos on server using mongo.
 
 Prioritization of todos using a simple priority system, which signals important using font-size. 
 Completion and Deletion of todos.
+
+A Flask-integrated unittesting suite. 
+
+Testing
+=====
+
+`python app_tests.py`
 
 Approach
 ======

@@ -19,6 +19,9 @@
       },
       id : function() {
         return api_data['id'];
+      }, 
+      pos : function() {
+        return api_data['pos'];
       }
     }
   }
@@ -49,6 +52,12 @@
     }
 
     $elem.click(function() {
+//from: http://stackoverflow.com/questions/1771627/preventing-click-event-with-jquery-drag-and-drop
+      if ($elem.hasClass('noclick')) {
+        $elem.removeClass('noclick');
+        return;
+      }
+
       var data = null;
       if (data_callback) { 
         data = data_callback();
@@ -101,18 +110,39 @@
                   "' class='todo'></div>"),
         $check = $('<input type="checkbox" class="form-control cbox">'),
         $text = $("<div class='text-div'></div>"), 
-        even_odd = i % 2 == 0 ? 'even' : 'odd';
+        even_odd = i % 2 == 0 ? 'even' : 'odd',
+        $anchor = $('<span class="anchor glyphicon glyphicon-move"></span>');
 
     if (todo.done()) {
       $text.addClass('done');
       $check.attr('checked', 'checked');
     }
+    $anchor.hide();
+
     $text.text(todo.text());
     $todo.addClass(even_odd);
 
     ajax_wrapper($todo, 'done', id);
     $todo.append($check);
     $todo.append($text);
+    $todo.append($anchor);
+
+    $todo.mouseover(function() {
+      $anchor.show();
+    }).mouseout(function() {
+      $anchor.hide();
+    });
+
+    $todo.draggable({
+       "handle" : ".anchor",
+       "start" : function() {
+          $(this).addClass('noclick');
+        }});
+    $todo.droppable({
+      "drop" : function(evt, ui) {
+        update_order(ui.draggable[0], this);
+      }
+    });
 
     return $todo;
 
@@ -202,6 +232,84 @@
     return val;
   }
 
+  function apply_on_all_todos(bool_check, 
+                              endpoint, 
+                              data_callback) {
+    //This should really be solved with promises
+    //But counting up and down is prob good enough
+    var pending = 0;
+    for (var i = 0, il = todos.length; i < il; i++) {
+      var _todo = todos[i],
+          todo = todo_model(_todo);
+
+      if (bool_check(todo)) {
+        var url = _todo_url(todo.id(), endpoint), 
+            data = null;
+        pending += 1;
+        if (data_callback) {
+          data = data_callback(todo);
+        }
+        $.post(url, data, function(_data) {
+          pending -= 1;
+
+          if (pending === 0) {
+            load_todos();
+          }
+
+        });
+      }
+    }
+  }
+
+  function get_todo_model_from_elem($elem) {
+    var dest_id = $elem.attr('id').substring(5),
+        i, il, todo;
+
+    for (i = 0, il = todos.length; i < il; i++) {
+      todo = todo_model(todos[i]);
+
+      if (todo.id() === dest_id) {
+        return todo;
+      }
+    }
+
+    return null;
+  }
+
+  function update_order(moved_elem, 
+                        destination_elem) {
+
+    var $dest = $(destination_elem), 
+        dst_model = get_todo_model_from_elem($dest),
+        dst_pos = dst_model.pos(), 
+        moved_model = get_todo_model_from_elem($(moved_elem)),
+        src_pos = moved_model.pos(),
+        min_pos = Math.min(dst_pos, src_pos),
+        max_pos = Math.max(dst_pos, src_pos);
+
+    apply_on_all_todos(
+      function(todo) {
+        return todo.pos() >= min_pos && 
+               todo.pos() <= max_pos;
+      }, 
+      'move',
+      function(todo) {
+        var new_pos;
+        if (todo.pos() === src_pos) {
+          new_pos = dst_pos;
+        } else {
+          if (src_pos > dst_pos) {
+            new_pos = todo.pos() + 1
+          } else {
+            new_pos = todo.pos() - 1
+          }
+        }
+  
+        return {'pos' : new_pos};
+      }
+    );
+  }
+
 
   $(document).ready(function() {
     var $newtodo = $('#newtodo');
@@ -217,28 +325,6 @@
       }
     });
 
-    function apply_on_all_todos(bool_check, endpoint) {
-      //This should really be solved with promises
-      //But counting up and down is prob good enough
-      var pending = 0;
-      for (var i = 0, il = todos.length; i < il; i++) {
-        var _todo = todos[i],
-            todo = todo_model(_todo);
-
-        if (bool_check(todo)) {
-          var url = _todo_url(todo.id(), endpoint);
-          pending += 1;
-          $.post(url, null, function(data) {
-            pending -= 1;
-
-            if (pending === 0) {
-              load_todos();
-            }
-
-          });
-        }
-      }
-    }
 
     $('#delete_completed').click(function() {
       apply_on_all_todos(

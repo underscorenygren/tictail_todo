@@ -24,6 +24,9 @@ class TodoORM():
   def n_users(self):
     return self.users.count() #Is this optimal way in mongokit?
 
+  def n_todos(self, user_id):
+    return self.todos.find({"user" : user_id}).count()
+
   def _query_to_json_dict(self, cursor):
     return [MongoTodo.mongo_to_json_dict(todo) for todo in cursor]
 
@@ -32,7 +35,7 @@ class TodoORM():
     if not self.ensure_user(user_id):
       return None
     
-    _todos = self.todos.find({"user" : user_id}).sort([("created_at", 1)])
+    _todos = self.todos.find({"user" : user_id}).sort([("pos", 1)])
     return self._query_to_json_dict(_todos)
 
   def find_by_id_and_user(self, todo_id, user_id):
@@ -85,8 +88,10 @@ class TodoORM():
     return todo
 
   def create_todo(self, user, text):
+    n_todos = self.n_todos(user)
     todo = self.todos.MongoTodo()
     todo.initialize(text, str(user))
+    todo.set_position(n_todos)
 
     return todo
 
@@ -133,6 +138,7 @@ class MongoTodo(Document):
     "user" : str,
     "priority" : int,
     "created_at" : int,
+    "pos" : int,
   }
 
   use_dot_notation = True
@@ -161,10 +167,13 @@ class MongoTodo(Document):
 
     self.update(text)
 
-  def update(self, text = None, done = None, priority = None):
+  def set_position(self, pos):
+    return self.update(None, None, None, pos)
+
+  def update(self, text = None, done = None, priority = None, pos = None):
     """updates the editable fields on the todo"""
 
-    do_update = text != None or done != None or priority != None
+    do_update = text != None or done != None or priority != None or pos != None
     if do_update:
       if text != None:
         self['text'] = text
@@ -172,6 +181,8 @@ class MongoTodo(Document):
         self['done'] = done
       if priority != None:
         self['priority'] = priority
+      if pos != None:
+        self['pos'] = pos
 
       #There's some type confusion here, stopgap solution
       self['id'] = str(self['id'])

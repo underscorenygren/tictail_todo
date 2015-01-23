@@ -46,7 +46,7 @@ def index():
   new_usr = app.todo_orm.create_user()
 
   return redirect(
-    url_for('user_root',  **{'user_id' : new_usr.usr_id()}))
+    url_for('user_root_classic',  **{'user_id' : new_usr.usr_id()}))
 
 @app.route("/<user_id>/")
 def user_root(user_id):
@@ -100,6 +100,17 @@ def update_text(user_id, todo_id):
 
   text = request.form['text']
   todo.update(text)
+
+  return jsonify(todo.to_json_dict())
+
+@app.route("/<user_id>/todo/<todo_id>/move", methods=['POST'])
+def update_pos(user_id, todo_id):
+  todo = app.todo_orm.find_model_by_id_and_user(todo_id, user_id)
+  
+  if not todo:
+    return jsonify({"msg" : "No todo with that id"})
+
+  todo.set_position(int(request.form['pos']))
 
   return jsonify(todo.to_json_dict())
 

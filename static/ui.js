@@ -137,7 +137,9 @@
        "handle" : ".anchor",
        "start" : function() {
           $(this).addClass('noclick');
-        }});
+        },
+        "containment" : "#todo_root", 
+        "snap" : ".todo"});
     $todo.droppable({
       "drop" : function(evt, ui) {
         update_order(ui.draggable[0], this);
